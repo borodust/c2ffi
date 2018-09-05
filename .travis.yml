@@ -1,0 +1,69 @@
+language: c
+sudo: false
+
+compiler: clang
+
+addons:
+  apt:
+    sources:
+      - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-5.0 main'
+        key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+    packages:
+      - gcc-multilib
+      - clang-5.0
+      - llvm-5.0-dev
+      - llvm-5.0-tools
+      - llvm-5.0-runtime
+
+env:
+  global:
+    - secure: "Oe3g/LbhQOeu2j/yDMwEnpIgg2BD6q0A1ygWBWE5z5EkEFl3l+q/4WcNU3Y3iplJW88ud80LfZm6ty9Os5ADG4y1EyxpYOOEVRFMt9crlr0nMNQF2DNeFMJtB/3/mRPyabel8I5JgWeDOsAKsYRd0Ii2EH4zgeXD0umzrFlbcht+h8TeMCiRlCQC2ecjJHZ9Lp6SDGeYA8Ftd0ZJzwh6MIwjZdsj5zJ6Q65tWuOLcP8OTC2J9qrsHoioz/0jSu9u5f1w/4LqiqVaN+MVTJ0g8a1MVsWzIHTvrymhQPxq2YFUPrtVmkCyA7cN7BRnZvxLqFt2pcBD9gxB4175om+PydBN0jjEiddylfa7kw21wnoaLpy5bVJoGBnVtl5fcATHufpDuwsAL4vK6GgZehcsJ71F8z5noweZ65/hoHUDuUGvbM7B5SIXiCJmRpt7so0qFAHgpKvfKpj23Fq7FyOdLsDYsFjPrYSSrDn+odeL7xASiCQeYK+Cq+yVjSd2a/0yHt5MtlYq6cf7ZVFjDrwjwP6yPmtHFJzIPl1A4mH0pYcQMKGeBefrGGleOIuJrzcP3uIzopUr6mmIOkQeRYFbXYYPyOXzUbbFEaACLsT5AFIbXbvTnYQkQucIX+STTpC4FjRSFBW+zUeYTPff7BGZxty2E6ysFbYS/QGCecpQKx0="
+
+matrix:
+  include:
+  - os: linux
+    env:
+      - ARCH=i686
+      - CFLAGS=-m32
+  - os: linux
+    env:
+      - ARCH=x86_64
+      - CFLAGS=-m64
+  - os: osx
+    env:
+      - ARCH=i686
+      - CFLAGS=-m32
+  - os: osx
+    env:
+      - ARCH=x86_64
+      - CFLAGS=-m64
+
+branches:
+  only:
+  - "/^v\\d+(\\.\\d+)+$/"
+
+before_install:
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+      brew update
+      brew install llvm@5
+      export LLVM_DIR=/usr/local/opt/llvm@5/lib/llvm-5.0/share/llvm/cmake/
+      export PATH="/usr/local/opt/llvm@5/bin/:$PATH"
+    fi
+
+script:
+  - mkdir build/ && cd build/ && cmake .. && make
+
+before_deploy:
+  - cd $TRAVIS_BUILD_DIR/build/bin/ && zip c2ffi.zip c2ffi
+  - export TARGET_FILE=$TRAVIS_BUILD_DIR/c2ffi-$TRAVIS_OS_NAME-$ARCH.zip
+  - mv $TRAVIS_BUILD_DIR/build/bin/c2ffi.zip $TARGET_FILE
+
+deploy:
+  provider: releases
+  api-key: $GITHUB_TOKEN
+  file: $TARGET_FILE
+  skip_cleanup: true
+  overwrite: true
+  on:
+    tags: true
