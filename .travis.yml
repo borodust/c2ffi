@@ -24,19 +24,19 @@ matrix:
   - os: linux
     env:
       - ARCH=i686
-      - CFLAGS=-m32
+      - CFLAGS=-m32 -static
   - os: linux
     env:
       - ARCH=x86_64
-      - CFLAGS=-m64
+      - CFLAGS=-m64 -static
   - os: osx
     env:
       - ARCH=i686
-      - CFLAGS=-m32
+      - CFLAGS=-m32 -static
   - os: osx
     env:
       - ARCH=x86_64
-      - CFLAGS=-m64
+      - CFLAGS=-m64 -static
 
 branches:
   only:
