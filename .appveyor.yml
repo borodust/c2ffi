@@ -4,7 +4,7 @@ image:
 environment:
   matrix:
   - platform: x64
-    ARCH: x86_64
+    ARCH: x86-64
     CFLAGS: -m64 -static -I"C:/Libraries/LLVM-5.0.0/include"
     PATH: C:\Libraries\llvm-5.0.0\bin;C:\msys64\mingw64\bin\;C:\msys64\usr\bin\;$(PATH)
     PACKAGES: mingw-w64-x86_64-toolchain mingw-w64-x86_64-cmake

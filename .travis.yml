@@ -24,18 +24,22 @@ matrix:
   - os: linux
     env:
       - ARCH=i686
+      - PLATFORM=linux
       - CFLAGS=-m32 -static
   - os: linux
     env:
-      - ARCH=x86_64
+      - ARCH=x86-64
+      - PLATFORM=linux
       - CFLAGS=-m64 -static
   - os: osx
     env:
       - ARCH=i686
+      - PLATFORM=darwin
       - CFLAGS=-m32 -static
   - os: osx
     env:
-      - ARCH=x86_64
+      - ARCH=x86-64
+      - PLATFORM=darwin
       - CFLAGS=-m64 -static
 
 branches:
@@ -56,7 +60,7 @@ script:
 
 before_deploy:
   - cd $TRAVIS_BUILD_DIR/build/bin/ && zip c2ffi.zip c2ffi
-  - export TARGET_FILE=$TRAVIS_BUILD_DIR/c2ffi-$TRAVIS_OS_NAME-$ARCH.zip
+  - export TARGET_FILE=$TRAVIS_BUILD_DIR/c2ffi-$PLATFORM-$ARCH.zip
   - mv $TRAVIS_BUILD_DIR/build/bin/c2ffi.zip $TARGET_FILE
 
 deploy:
