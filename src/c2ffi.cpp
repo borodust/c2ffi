@@ -63,9 +63,6 @@ int main(int argc, char *argv[]) {
     add_include(ci, "/opt/llvm/lib/clang/" CLANG_VERSION_STRING "/include", true);
     add_include(ci, "/usr/include", true);
 
-    add_includes(ci, sys.includes, false, true);
-    add_includes(ci, sys.sys_includes, true, true);
-
     C2FFIASTConsumer *astc = NULL;
 
     const clang::FileEntry *file = ci.getFileManager().getFile(sys.filename);

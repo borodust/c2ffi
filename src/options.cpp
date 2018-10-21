@@ -29,7 +29,7 @@
 #include "c2ffi.h"
 #include "c2ffi/opt.h"
 
-static char short_opt[] = "I:i:D:M:o:hN:x:A:T:E";
+static char short_opt[] = "I:i:F:D:M:o:hN:x:A:T:E";
 
 enum {
     WITH_MACRO_DEFS = CHAR_MAX+1,
@@ -38,6 +38,7 @@ enum {
 static struct option options[] = {
     { "include",     required_argument, 0, 'I' },
     { "sys-include", required_argument, 0, 'i' },
+    { "framework-include", required_argument, 0, 'F' },
     { "driver",      required_argument, 0, 'D' },
     { "help",        no_argument,       0, 'h' },
     { "macro-file",  required_argument, 0, 'M' },
@@ -131,6 +132,10 @@ void c2ffi::process_args(config &config, int argc, char *argv[]) {
 
             case 'I':
                 config.includes.push_back(optarg);
+                break;
+
+            case 'F':
+                config.framework_includes.push_back(optarg);
                 break;
 
             case 'i':
@@ -234,24 +239,25 @@ void usage(void) {
         "Usage: c2ffi [options ...] FILE\n"
         "\n"
         "Options:\n"
-        "      -I, --include        Add a \"LOCAL\" include path\n"
-        "      -i, --sys-include    Add a <system> include path\n"
-        "      -D, --driver         Specify an output driver (default: "
+        "      -I, --include	        Add a \"LOCAL\" include path\n"
+        "      -i, --sys-include        Add a <system> include path\n"
+        "      -F, --framework-include  Add MacOS framework include path\n"
+        "      -D, --driver	        Specify an output driver (default: "
          << OutputDrivers[0].name << ")\n"
         "\n"
-        "      -o, --output         Specify an output file (default: stdout)\n"
-        "      -M, --macro-file     Specify a file for macro definition output\n"
-        "      --with-macro-defs    Also include #defines for macro definitions\n"
+        "      -o, --output	        Specify an output file (default: stdout)\n"
+        "      -M, --macro-file	        Specify a file for macro definition output\n"
+        "      --with-macro-defs        Also include #defines for macro definitions\n"
         "\n"
-        "      -N, --namespace      Specify target namespace/package/etc\n"
+        "      -N, --namespace		Specify target namespace/package/etc\n"
         "\n"
-        "      -A, --arch           Specify the target triple for LLVM\n"
-        "                           (default: "
+        "      -A, --arch		Specify the target triple for LLVM\n"
+        "                                    (default: "
          << llvm::sys::getDefaultTargetTriple() << ")\n"
-        "      -x, --lang           Specify language (c, c++, objc, objc++)\n"
-        "      --std                Specify the standard (c99, c++0x, c++11, ...)\n"
+        "      -x, --lang               Specify language (c, c++, objc, objc++)\n"
+        "      --std			Specify the standard (c99, c++0x, c++11, ...)\n"
         "\n"
-        "      -E                   Preprocessed output only, a la clang -E\n"
+        "      -E			Preprocessed output only, a la clang -E\n"
         "\n"
         "Drivers: ";
 
