@@ -73,6 +73,30 @@ void c2ffi::add_include(clang::CompilerInstance &ci, const char *path, bool is_a
         .AddSearchPath(lookup, is_angled);
 }
 
+void c2ffi::add_framework_include(clang::CompilerInstance &ci, const char *path,
+                                  bool show_error) {
+    struct stat buf;
+    if(stat(path, &buf) < 0 || !S_ISDIR(buf.st_mode)) {
+        if(show_error) {
+            std::cerr << "Error: Not a directory: ";
+            std::cerr << "-F ";
+            std::cerr << path << std::endl;
+            exit(1);
+        }
+
+        return;
+    }
+
+    ci.getHeaderSearchOpts()
+      .AddPath(StringRef(path), clang::frontend::IncludeDirGroup::Angled, true, true);
+}
+
+void c2ffi::add_framework_includes(clang::CompilerInstance &ci,
+                                   c2ffi::IncludeVector &v, bool show_error) {
+    for(c2ffi::IncludeVector::iterator i = v.begin(); i != v.end(); i++)
+        add_framework_include(ci, (*i).c_str(), show_error);
+}
+
 void c2ffi::add_includes(clang::CompilerInstance &ci,
                          c2ffi::IncludeVector &v, bool is_angled,
                          bool show_error) {
@@ -116,15 +140,21 @@ void c2ffi::init_ci(config &c, clang::CompilerInstance &ci) {
                       << "'" << std::endl;
     }
 
+    ci.createFileManager();
+    ci.createSourceManager(ci.getFileManager());
+
     clang::PreprocessorOptions preopts;
     ci.getInvocation().setLangDefaults(lo, c.kind, pti->getTriple(), preopts, c.std);
 
     ci.setTarget(pti);
-    ci.createFileManager();
-    ci.createSourceManager(ci.getFileManager());
+
+    add_framework_includes(ci, c.framework_includes, true);
+
     ci.createPreprocessor(clang::TU_Complete);
     ci.getPreprocessorOpts().UsePredefines = false;
     ci.getPreprocessorOutputOpts().ShowCPP = c.preprocess_only;
     ci.getPreprocessor().setPreprocessedOutput(c.preprocess_only);
-}
 
+    add_includes(ci, c.includes, false, true);
+    add_includes(ci, c.sys_includes, true, true);
+}
