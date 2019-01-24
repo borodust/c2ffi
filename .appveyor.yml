@@ -5,23 +5,26 @@ environment:
   matrix:
   - platform: x64
     ARCH: x86-64
-    CFLAGS: -m64 -static -I"/opt/llvm50/include/" -L"/opt/llvm50/lib/"
+    CFLAGS: -m64 -static -I/opt/llvm50/include/ -L/opt/llvm50/lib/
     PATH: C:\msys64\mingw64\bin\;C:\msys64\usr\bin\;$(PATH)
-    PACKAGES: mingw-w64-x86_64-toolchain mingw-w64-x86_64-g++ mingw-w64-x86_64-cmake
+    PACKAGES: mingw-w64-x86_64-toolchain mingw-w64-x86_64-cmake
 
 skip_non_tags: true
 
 branches:
-  onpply:
+  only:
     - master
     - "/^v\\d+(\\.\\d+)+$/"
+
+cache:
+  - C:\msys64\llvm.tar.gz
 
 install:
   - >
     sh -c "
     pacman -S --needed --noconfirm base-devel %PACKAGES%
     && wget -O /llvm.tar.gz http://bodge.borodust.org/files/llvm50.tar.gz
-    && cd / && tar -xf llvm.tar.gz .
+    && cd /opt/ && tar -xf /llvm.tar.gz
     "
 
 build_script:
@@ -31,12 +34,12 @@ build_script:
     export LLVM_DIR=/opt/llvm50/lib/cmake/
     && mkdir build
     && cd build
-    && cmake -G "Unix Makefiles" ..
+    && cmake -DCMAKE_BUILD_TYPE=Release -G'Unix Makefiles' ..
     && cmake --build .
+    || true
     "
-
-before_deploy:
   - mv %APPVEYOR_BUILD_FOLDER%\build\bin\c2ffi.exe %APPVEYOR_BUILD_FOLDER%\%TARGET_ARTIFACT%
+
 
 artifacts:
   - path: $(TARGET_ARTIFACT)
