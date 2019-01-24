@@ -5,29 +5,35 @@ environment:
   matrix:
   - platform: x64
     ARCH: x86-64
-    CFLAGS: -m64 -static -I"C:/Libraries/LLVM-5.0.0/include"
-    PATH: C:\Libraries\llvm-5.0.0\bin;C:\msys64\mingw64\bin\;C:\msys64\usr\bin\;$(PATH)
-    PACKAGES: mingw-w64-x86_64-toolchain mingw-w64-x86_64-cmake
-  - platform: x86
-    ARCH: i686
-    CFLAGS: -m32 -static -I"C:/Libraries/LLVM-5.0.0/include"
-    PATH: C:\Libraries\llvm-5.0.0\bin;C:\msys64\mingw32\bin\;C:\msys64\usr\bin\;$(PATH)
-    PACKAGES: mingw-w64-i686-toolchain mingw-w64-i686-cmake
+    CFLAGS: -m64 -static -I"/opt/llvm50/include/" -L"/opt/llvm50/lib/"
+    PATH: C:\msys64\mingw64\bin\;C:\msys64\usr\bin\;$(PATH)
+    PACKAGES: mingw-w64-x86_64-toolchain mingw-w64-x86_64-g++ mingw-w64-x86_64-cmake
 
 skip_non_tags: true
 
 branches:
-  only:
+  onpply:
     - master
     - "/^v\\d+(\\.\\d+)+$/"
 
+install:
+  - >
+    sh -c "
+    pacman -S --needed --noconfirm base-devel %PACKAGES%
+    && wget -O /llvm.tar.gz http://bodge.borodust.org/files/llvm50.tar.gz
+    && cd / && tar -xf llvm.tar.gz .
+    "
+
 build_script:
-  - pacman -S --needed --noconfirm base-devel %PACKAGES%
   - set TARGET_ARTIFACT=c2ffi-windows-%ARCH%.zip
-  - mkdir build
-  - cd build
-  - cmake -G "Unix Makefiles" ..
-  - cmake --build .
+  - >
+    sh -c "
+    export LLVM_DIR=/opt/llvm50/lib/cmake/
+    && mkdir build
+    && cd build
+    && cmake -G "Unix Makefiles" ..
+    && cmake --build .
+    "
 
 before_deploy:
   - mv %APPVEYOR_BUILD_FOLDER%\build\bin\c2ffi.exe %APPVEYOR_BUILD_FOLDER%\%TARGET_ARTIFACT%
