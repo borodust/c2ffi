@@ -92,7 +92,9 @@ target_link_libraries(${APP_NAME}
   #clang
   clangToolingCore
   clangTooling
-  ${llvm_libs})
+  llvmProfileData
+  ${llvm_libs}
+  version)
 
 set(APP_BIN_DIR "${CMAKE_BINARY_DIR}/bin")
 set_target_properties(${APP_NAME} PROPERTIES
