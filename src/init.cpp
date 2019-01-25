@@ -138,10 +138,8 @@ void c2ffi::init_ci(config &c, clang::CompilerInstance &ci) {
                       << "' for triple '" << c.arch
                       << "'" << std::endl;
     }
-
     ci.createFileManager();
     ci.createSourceManager(ci.getFileManager());
-
     clang::PreprocessorOptions preopts;
     ci.getInvocation().setLangDefaults(lo, c.kind, pti->getTriple(), preopts, c.std);
 
@@ -150,7 +148,6 @@ void c2ffi::init_ci(config &c, clang::CompilerInstance &ci) {
     add_framework_includes(ci, c.framework_includes, true);
 
     ci.createPreprocessor(clang::TU_Complete);
-    ci.getPreprocessorOpts().UsePredefines = false;
     ci.getPreprocessorOutputOpts().ShowCPP = c.preprocess_only;
     ci.getPreprocessor().setPreprocessedOutput(c.preprocess_only);
 

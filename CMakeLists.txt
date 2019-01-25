@@ -64,7 +64,9 @@ target_link_libraries(c2ffi PUBLIC
   clangIndex
   clangToolingCore
   clangTooling
-  )
+  llvmProfileData
+  ${llvm_libs}
+  version)
 
 llvm_config(c2ffi USE_SHARED core support mcparser bitreader profiledata)
 
