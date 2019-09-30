@@ -88,13 +88,13 @@ void c2ffi::add_framework_include(clang::CompilerInstance &ci, const char *path,
     }
 
     ci.getHeaderSearchOpts()
-      .AddPath(StringRef(path), clang::frontend::IncludeDirGroup::Angled, true, true);
+      .AddPath(llvm::StringRef(path), clang::frontend::IncludeDirGroup::Angled, true, true);
 }
 
 void c2ffi::add_framework_includes(clang::CompilerInstance &ci,
-                                   c2ffi::IncludeVector &v, bool show_error) {
-    for(c2ffi::IncludeVector::iterator i = v.begin(); i != v.end(); i++)
-        add_framework_include(ci, (*i).c_str(), show_error);
+                                   c2ffi::IncludeVector &includes, bool show_error) {
+  for(auto &&include : includes)
+    add_framework_include(ci, include.c_str(), show_error);
 }
 
 void c2ffi::add_includes(clang::CompilerInstance &ci,
