@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.8)
 project(c2ffi)
 
 set(SOURCE_ROOT ${CMAKE_SOURCE_DIR})
+set(BUILD_SHARED_LIBS OFF)
+set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+
+link_directories("/opt/bodge/llvm8/lib/")
 
 find_package(LLVM 8.0 REQUIRED CONFIG)
 
@@ -10,7 +14,6 @@ message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "LLVM installed in ${LLVM_INSTALL_PREFIX}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
-set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 set(CMAKE_CXX_STANDARD 11)
 
 message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
@@ -34,11 +37,12 @@ set(HEADER_FILES
   ${HEADER_GLOB}
   )
 
+add_compile_definitions(LLDB_DISABLE_LIBEDIT=1)
+
 add_executable(c2ffi ${SOURCE_FILES} ${HEADER_FILES})
-target_compile_options(c2ffi PUBLIC -fno-exceptions -fno-rtti)
 set_target_properties(c2ffi PROPERTIES LINK_SEARCH_START_STATIC 1)
 set_target_properties(c2ffi PROPERTIES LINK_SEARCH_END_STATIC 1)
-
+target_compile_options(c2ffi PUBLIC -fno-exceptions -fno-rtti)
 
 target_include_directories(c2ffi PUBLIC
   ${LLVM_INCLUDE_DIRS}
@@ -68,8 +72,12 @@ target_link_libraries(c2ffi PUBLIC
   clangFormat
   clangIndex
   clangToolingCore
-  clangTooling
+  clangTooling)
+
+if (WIN32)
+target_link_libraries(c2ffi PUBLIC
   version)
+endif (WIN32)
 
 llvm_config(c2ffi core support mcparser bitreader profiledata option)
 
