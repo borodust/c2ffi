@@ -10,6 +10,7 @@ message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "LLVM installed in ${LLVM_INSTALL_PREFIX}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
+set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 set(CMAKE_CXX_STANDARD 11)
 
 message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
@@ -35,6 +36,10 @@ set(HEADER_FILES
 
 add_executable(c2ffi ${SOURCE_FILES} ${HEADER_FILES})
 target_compile_options(c2ffi PUBLIC -fno-exceptions -fno-rtti)
+set_target_properties(c2ffi PROPERTIES LINK_SEARCH_START_STATIC 1)
+set_target_properties(c2ffi PROPERTIES LINK_SEARCH_END_STATIC 1)
+
+
 target_include_directories(c2ffi PUBLIC
   ${LLVM_INCLUDE_DIRS}
   ${SOURCE_ROOT}/src/include
@@ -63,9 +68,10 @@ target_link_libraries(c2ffi PUBLIC
   clangFormat
   clangIndex
   clangToolingCore
-  clangTooling)
+  clangTooling
+  version)
 
-llvm_config(c2ffi USE_SHARED core support mcparser bitreader profiledata)
+llvm_config(c2ffi core support mcparser bitreader profiledata option)
 
 set(APP_BIN_DIR "${CMAKE_BINARY_DIR}/bin")
 set_target_properties(c2ffi PROPERTIES
