@@ -28,7 +28,7 @@ using namespace c2ffi;
 using namespace std;
 
 TemplateArg::TemplateArg(C2FFIASTConsumer *ast, const clang::TemplateArgument &arg)
-        : _type(NULL), _has_val(false), _val("") {
+        : _type(nullptr), _has_val(false), _val("") {
 
     if (arg.getKind() == clang::TemplateArgument::Type)
         _type = Type::make_type(ast, arg.getAsType().getTypePtrOrNull());
@@ -58,18 +58,39 @@ TemplateArg::TemplateArg(C2FFIASTConsumer *ast, const clang::TemplateArgument &a
     } else {
         std::stringstream ss;
         ss << "<unknown:" << arg.getKind() << ">";
-        _type = new SimpleType(ast->ci(), NULL, ss.str());
+        _type = new SimpleType(ast->ci(), nullptr, ss.str());
     }
 }
+
+TemplateArg::TemplateArg(C2FFIASTConsumer *ast, const clang::NamedDecl &arg)
+        : _type(nullptr), _has_val(false), _val("") {
+
+    std::stringstream ss;
+    ss << "<unknown:" << arg.getKind() << ">";
+    _type = new SimpleType(ast->ci(), nullptr, ss.str());
+}
+
 
 TemplateMixin::TemplateMixin(C2FFIASTConsumer *ast, const clang::TemplateArgumentList *arglist)
         : _is_template(false) {
 
-    if (arglist == NULL) return;
+    if (arglist == nullptr) return;
 
     _is_template = true;
 
-    for (int i = 0; i < arglist->size(); i++) _args.push_back(new TemplateArg(ast, (*arglist)[i]));
+    for (size_t i = 0; i < arglist->size(); i++)
+        _args.push_back(new TemplateArg(ast, (*arglist)[i]));
+}
+
+TemplateMixin::TemplateMixin(C2FFIASTConsumer *ast, const clang::TemplateParameterList *arglist)
+        : _is_template(false) {
+
+    if (arglist == nullptr) return;
+
+    _is_template = true;
+
+    for (size_t i = 0; i < arglist->size(); i++)
+        _args.push_back(new TemplateArg(ast, *(*arglist).getParam(i)));
 }
 
 void C2FFIASTConsumer::write_template(
@@ -90,7 +111,7 @@ void C2FFIASTConsumer::write_template(
 
     const clang::TemplateArgumentList &arglist = d->getTemplateInstantiationArgs();
 
-    for (int i = 0; i < arglist.size(); i++) {
+    for (size_t i = 0; i < arglist.size(); i++) {
         if (i > 0) out << ", ";
 
         const clang::TemplateArgument &arg = arglist[i];

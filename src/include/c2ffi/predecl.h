@@ -67,6 +67,18 @@ namespace c2ffi {
 
     class CXXNamespaceDecl;
 
+    class TypeAliasDecl;
+
+    class TypeAliasTemplateDecl;
+
+    class VarTemplateDecl;
+
+    class UsingDecl;
+
+    class UsingShadowDecl;
+
+    class UsingDirectiveDecl;
+
     class ObjCInterfaceDecl;
 
     class ObjCCategoryDecl;

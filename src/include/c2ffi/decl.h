@@ -108,7 +108,7 @@ namespace c2ffi {
     public:
         virtual ~FieldsMixin();
 
-        void add_field(const Name&, Type *);
+        void add_field(const Name &, Type *);
 
         void add_field(C2FFIASTConsumer *ast, clang::FieldDecl *f);
 
@@ -211,7 +211,7 @@ namespace c2ffi {
 
         DEFWRITER(EnumDecl);
 
-        void add_field(const std::string&, uint64_t);
+        void add_field(const std::string &, uint64_t);
 
         const NameNumVector &fields() const { return _v; }
     };
@@ -308,6 +308,66 @@ namespace c2ffi {
         DEFWRITER(CXXNamespaceDecl);
     };
 
+    class TypeAliasDecl : public TypeDecl {
+    public:
+        TypeAliasDecl(std::string name, Type *type)
+                : TypeDecl(std::move(name), type) {}
+
+        DEFWRITER(TypeAliasDecl);
+    };
+
+    class TypeAliasTemplateDecl : public TypeAliasDecl, public TemplateMixin {
+    public:
+        TypeAliasTemplateDecl(C2FFIASTConsumer *ast, std::string name, Type *type,
+                              clang::TemplateParameterList *arglist = nullptr)
+                : TypeAliasDecl(std::move(name), type), TemplateMixin(ast, arglist) {
+
+        }
+
+        DEFWRITER(TypeAliasTemplateDecl);
+    };
+
+    class VarTemplateDecl : public VarDecl, public TemplateMixin {
+    public:
+        VarTemplateDecl(C2FFIASTConsumer *ast, std::string name, Type *type,
+                        std::string value = "", bool is_extern = false, bool is_string = false,
+                        const clang::TemplateParameterList *arglist = nullptr)
+                : VarDecl(std::move(name), type, value, is_extern, is_string), TemplateMixin(ast, arglist) {
+
+        }
+
+        DEFWRITER(VarTemplateDecl);
+    };
+
+
+    class UsingShadowDecl : public Decl {
+    public:
+        UsingShadowDecl(std::string name)
+                : Decl(std::move(name)) {
+        }
+
+        DEFWRITER(UsingShadowDecl);
+    };
+
+
+    class UsingDecl : public Decl {
+    public:
+        UsingDecl(std::string name)
+                : Decl(std::move(name)) {
+        }
+
+        DEFWRITER(UsingDecl);
+    };
+
+    class UsingDirectiveDecl : public Decl {
+    public:
+        UsingDirectiveDecl(std::string name)
+                : Decl(std::move(name)) {
+        }
+
+        DEFWRITER(UsingDirectiveDecl);
+    };
+
     /** ObjC **/
     class ObjCInterfaceDecl : public Decl, public FieldsMixin,
                               public FunctionsMixin {
@@ -325,7 +385,7 @@ namespace c2ffi {
 
         bool is_forward() const { return _is_forward; }
 
-        void add_protocol(const Name& proto);
+        void add_protocol(const Name &proto);
 
         const NameVector &protocols() const { return _protocols; }
     };

@@ -43,16 +43,16 @@ void Decl::set_location(clang::CompilerInstance &ci, const clang::Decl *d) {
 }
 
 FieldsMixin::~FieldsMixin() {
-    for (auto & i : _v)
+    for (auto &i : _v)
         delete i.second;
 }
 
 FunctionsMixin::~FunctionsMixin() {
-    for (auto & i : _v)
+    for (auto &i : _v)
         delete i;
 }
 
-void FieldsMixin::add_field(const Name& name, Type *t) {
+void FieldsMixin::add_field(const Name &name, Type *t) {
     _v.push_back(NameTypePair(name, t));
 }
 
@@ -87,10 +87,10 @@ void FunctionsMixin::add_functions(C2FFIASTConsumer *ast, const clang::ObjCConta
          m != d->meth_end(); m++) {
         const clang::Type *return_type = m->getReturnType().getTypePtr();
         auto *f = new FunctionDecl(ast,
-                                           m->getDeclName().getAsString(),
-                                           Type::make_type(ast, return_type),
-                                           m->isVariadic(), false,
-                                           clang::SC_None);
+                                   m->getDeclName().getAsString(),
+                                   Type::make_type(ast, return_type),
+                                   m->isVariadic(), false,
+                                   clang::SC_None);
 
         f->set_is_objc_method(true);
         f->set_is_class_method(m->isClassMethod());
@@ -112,11 +112,11 @@ void FunctionsMixin::add_functions(C2FFIASTConsumer *ast, const clang::CXXRecord
         const clang::Type *return_type = m->getReturnType().getTypePtr();
 
         auto *f = new CXXFunctionDecl(ast,
-                                                 m->getDeclName().getAsString(),
-                                                 Type::make_type(ast, return_type),
-                                                 m->isVariadic(),
-                                                 m->isInlineSpecified(),
-                                                 m->getStorageClass());
+                                      m->getDeclName().getAsString(),
+                                      Type::make_type(ast, return_type),
+                                      m->isVariadic(),
+                                      m->isInlineSpecified(),
+                                      m->getStorageClass());
 
         f->set_is_static(m->isStatic());
         f->set_is_virtual(m->isVirtual());
@@ -172,10 +172,10 @@ void RecordDecl::fill_record_decl(C2FFIASTConsumer *ast, const clang::RecordDecl
         add_field(ast, *i);
 }
 
-void EnumDecl::add_field(const Name& name, uint64_t v) {
+void EnumDecl::add_field(const Name &name, uint64_t v) {
     _v.push_back(NameNumPair(name, v));
 }
 
-void ObjCInterfaceDecl::add_protocol(const Name& name) {
+void ObjCInterfaceDecl::add_protocol(const Name &name) {
     _protocols.push_back(name);
 }

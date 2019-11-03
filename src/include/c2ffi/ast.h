@@ -116,6 +116,18 @@ namespace c2ffi {
 
         Decl *make_decl(const clang::NamespaceDecl *d);
 
+        Decl *make_decl(const clang::TypeAliasDecl *d);
+
+        Decl *make_decl(const clang::TypeAliasTemplateDecl *d);
+
+        Decl *make_decl(const clang::VarTemplateDecl *d);
+
+        Decl *make_decl(const clang::UsingDecl *d);
+
+        Decl *make_decl(const clang::UsingShadowDecl *d);
+
+        Decl *make_decl(const clang::UsingDirectiveDecl *d);
+
         Decl *make_decl(const clang::ObjCInterfaceDecl *d);
 
         Decl *make_decl(const clang::ObjCCategoryDecl *d);

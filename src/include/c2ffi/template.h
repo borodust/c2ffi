@@ -40,6 +40,8 @@ namespace c2ffi {
     public:
         TemplateArg(C2FFIASTConsumer *ast,
                     const clang::TemplateArgument &arg);
+        TemplateArg(C2FFIASTConsumer *ast,
+                    const clang::NamedDecl &arg);
 
         bool has_val() const { return _has_val; }
 
@@ -57,6 +59,8 @@ namespace c2ffi {
     public:
         TemplateMixin(C2FFIASTConsumer *ast,
                       const clang::TemplateArgumentList *arglist);
+        TemplateMixin(C2FFIASTConsumer *ast,
+                      const clang::TemplateParameterList *arglist);
 
         const TemplateArgVector &args() const { return _args; }
 

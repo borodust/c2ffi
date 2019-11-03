@@ -54,7 +54,7 @@ static struct option options[] = {
 
 static void usage();
 
-static c2ffi::OutputDriver *select_driver(const std::string& name, std::ostream *os);
+static c2ffi::OutputDriver *select_driver(const std::string &name, std::ostream *os);
 
 clang::InputKind parseLang(const std::string &str) {
     using namespace clang;
@@ -81,7 +81,7 @@ clang::LangStandard::Kind parseStd(const std::string &std) {
 
 #pragma clang diagnostic pop
 
-clang::InputKind parseExtension(const std::string& file) {
+clang::InputKind parseExtension(const std::string &file) {
     using namespace clang;
     using Language = InputKind::Language;
 
@@ -93,9 +93,9 @@ clang::InputKind parseExtension(const std::string& file) {
         ext == "c++" ||
         ext == "hpp" ||
         ext == "hxx")
-        return InputKind(Language::CXX);
-    if (ext == "m") return InputKind(Language::ObjC);
-    if (ext == "mm") return InputKind(Language::ObjCXX);
+        return {Language::CXX};
+    if (ext == "m") return {Language::ObjC};
+    if (ext == "mm") return {Language::ObjCXX};
 
     return {Language::C};
 }
@@ -248,28 +248,24 @@ void usage() {
          "Usage: c2ffi [options ...] FILE\n"
          "\n"
          "Options:\n"
-         "      -I, --include	        Add a \"LOCAL\" include path\n"
+         "      -I, --include            Add a \"LOCAL\" include path\n"
          "      -i, --sys-include        Add a <system> include path\n"
          "      -F, --framework-include  Add MacOS framework include path\n"
-         "      -D, --driver	        Specify an output driver (default: "
-         << OutputDrivers[0].name << ")\n"
-                                     "\n"
-                                     "      -o, --output	        Specify an output file (default: stdout)\n"
-                                     "      -M, --macro-file	        Specify a file for macro definition output\n"
-                                     "      --with-macro-defs        Also include #defines for macro definitions\n"
-                                     "\n"
-                                     "      -N, --namespace		Specify target namespace/package/etc\n"
-                                     "\n"
-                                     "      -A, --arch		Specify the target triple for LLVM\n"
-                                     "                                    (default: "
-         << llvm::sys::getDefaultTargetTriple() << ")\n"
-                                                   "      -x, --lang               Specify language (c, c++, objc, objc++)\n"
-                                                   "      --std			Specify the standard (c99, c++0x, c++11, ...)\n"
-                                                   "\n"
-                                                   "      -E			Preprocessed output only, a la clang -E\n"
-                                                   "\n"
-                                                   "Drivers: ";
-
+         "      -D, --driver             Specify an output driver (default: "
+         << OutputDrivers[0].name <<
+         ")\n\n"
+         "      -o, --output             Specify an output file (default: stdout)\n"
+         "      -M, --macro-file         Specify a file for macro definition output\n"
+         "      --with-macro-defs        Also include #defines for macro definitions\n\n"
+         "      -N, --namespace          Specify target namespace/package/etc\n\n"
+         "      -A, --arch               Specify the target triple for LLVM\n"
+         "                                    (default: "
+         << llvm::sys::getDefaultTargetTriple() <<
+         ")\n"
+         "      -x, --lang               Specify language (c, c++, objc, objc++)\n"
+         "      --std                    Specify the standard (c99, c++0x, c++11, ...)\n\n"
+         "      -E                       Preprocessed output only, a la clang -E\n\n"
+         "Drivers: ";
     for (int i = 0;; i++) {
         if (!OutputDrivers[i].name) break;
         cout << OutputDrivers[i].name;
@@ -280,7 +276,7 @@ void usage() {
     cout << endl;
 }
 
-c2ffi::OutputDriver *select_driver(const std::string& name, std::ostream *os) {
+c2ffi::OutputDriver *select_driver(const std::string &name, std::ostream *os) {
     using namespace c2ffi;
     using namespace std;
 

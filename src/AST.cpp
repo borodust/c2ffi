@@ -103,7 +103,12 @@ void C2FFIASTConsumer::HandleDecl(clang::Decl *d, const clang::NamedDecl *ns) {
     } else if_cast(x, clang::EnumDecl, d) PROC;
     else if_cast(x, clang::TypedefDecl, d) PROC;
     else if_cast(x, clang::ClassTemplateDecl, d);
-
+    else if_cast(x, clang::TypeAliasDecl, d) PROC;
+    else if_cast(x, clang::TypeAliasTemplateDecl, d) PROC;
+    else if_cast(x, clang::VarTemplateDecl, d) PROC;
+    else if_cast(x, clang::UsingDecl, d) PROC;
+    else if_cast(x, clang::UsingShadowDecl, d) PROC;
+    else if_cast(x, clang::UsingDirectiveDecl, d) PROC;
         /* ObjC */
     else if_cast(x, clang::ObjCInterfaceDecl, d) PROC;
     else if_cast(x, clang::ObjCCategoryDecl, d) PROC;
@@ -410,4 +415,104 @@ unsigned int C2FFIASTConsumer::decl_id(const clang::Decl *d) const {
         return it->second;
     else
         return 0;
+}
+
+
+Decl *C2FFIASTConsumer::make_decl(const clang::TypeAliasDecl *d) {
+    const clang::Type *t = d->getUnderlyingType().getTypePtr();
+
+    if (is_underlying_valid(t)) {
+        return new TypeAliasDecl(d->getDeclName().getAsString(), Type::make_type(this, t));
+    } else {
+        std::cerr << "Skipping type alias to invalid type:" << std::endl;
+        d->dump();
+        return nullptr;
+    }
+}
+
+Decl *C2FFIASTConsumer::make_decl(const clang::TypeAliasTemplateDecl *d) {
+    const clang::Type *t = d->getTemplatedDecl()->getUnderlyingType().getTypePtr();
+
+    if (is_underlying_valid(t)) {
+        return new TypeAliasTemplateDecl(this,
+                                         d->getDeclName().getAsString(),
+                                         Type::make_type(this, t),
+                                         d->getTemplateParameters());
+    } else {
+        std::cerr << "Skipping type alias template to invalid type:" << std::endl;
+        d->dump();
+        return nullptr;
+    }
+}
+
+Decl *C2FFIASTConsumer::make_decl(const clang::VarTemplateDecl *d) {
+    clang::ASTContext &ctx = _ci.getASTContext();
+    clang::APValue *v = nullptr;
+    std::string name = d->getDeclName().getAsString();
+    std::string value;
+    std::string loc;
+    bool is_string = false;
+
+    if (name.substr(0, 8) == "__c2ffi_") {
+        name = name.substr(8, std::string::npos);
+
+        clang::Preprocessor &pp = _ci.getPreprocessor();
+        clang::IdentifierInfo &ii = pp.getIdentifierTable().get(llvm::StringRef(name));
+        const clang::MacroInfo *mi = pp.getMacroInfo(&ii);
+
+        if (mi)
+            loc = mi->getDefinitionLoc().printToString(_ci.getSourceManager());
+    }
+
+    clang::VarDecl *var_decl = d->getTemplatedDecl();
+    if (var_decl) {
+        if (!var_decl->getType()->isDependentType()) {
+            clang::EvaluatedStmt *stmt = var_decl->ensureEvaluatedStmt();
+            auto *e = clang::cast<clang::Expr>(stmt->Value);
+            if (!e->isValueDependent() &&
+                ((v = var_decl->evaluateValue()) ||
+                 (v = var_decl->getEvaluatedValue()))) {
+                if (v->isLValue()) {
+                    clang::APValue::LValueBase base = v->getLValueBase();
+                    if (!base.isNull() && base.is<const clang::Expr *>()) {
+                        const auto *expr = base.get<const clang::Expr *>();
+
+                        if_const_cast(s, clang::StringLiteral, expr) {
+                            is_string = true;
+
+                            if (s->isAscii() || s->isUTF8()) {
+                                value = s->getString();
+                            } else {
+
+                            }
+                        }
+                    }
+                } else {
+                    value = value_to_string(v);
+                }
+            }
+        }
+    }
+
+    Type *t = Type::make_type(this, var_decl->getTypeSourceInfo()->getType().getTypePtr());
+    auto *cv = new VarTemplateDecl(this, name, t, value,
+                                   var_decl->hasExternalStorage(), is_string,
+                                   d->getTemplateParameters());
+
+    if (!loc.empty())
+        cv->set_location(loc);
+
+    return cv;
+}
+
+Decl *C2FFIASTConsumer::make_decl(const clang::UsingDecl *d) {
+    return new UsingDecl(d->getNameAsString());
+}
+
+Decl *C2FFIASTConsumer::make_decl(const clang::UsingShadowDecl *d) {
+    return new UsingShadowDecl(d->getNameAsString());
+}
+
+Decl *C2FFIASTConsumer::make_decl(const clang::UsingDirectiveDecl *d) {
+    return new UsingDirectiveDecl(d->getNameAsString());
 }

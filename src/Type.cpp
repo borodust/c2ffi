@@ -77,7 +77,7 @@ static std::string make_builtin_name(const clang::BuiltinType *bt) {
 Type *Type::make_type(C2FFIASTConsumer *ast, const clang::Type *t) {
     clang::CompilerInstance &ci = ast->ci();
     clang::ASTContext &ctx = ci.getASTContext();
-    
+
     /*** Order is important here ***/
 
     if (t->isVoidType())

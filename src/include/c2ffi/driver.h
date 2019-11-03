@@ -5,6 +5,8 @@
 #ifndef C2FFI_DRIVER_H
 #define C2FFI_DRIVER_H
 
+#include "c2ffi/predecl.h"
+
 #define DEFWRITER(x) virtual void write(OutputDriver &od) const override { od.write((const x&)*this); }
 
 namespace c2ffi {
@@ -77,6 +79,18 @@ namespace c2ffi {
         virtual void write(const CXXFunctionDecl &d) {}
 
         virtual void write(const CXXNamespaceDecl &d) {}
+
+        virtual void write(const TypeAliasDecl &d) {}
+
+        virtual void write(const TypeAliasTemplateDecl &d) {}
+
+        virtual void write(const VarTemplateDecl &d) {}
+
+        virtual void write(const UsingDecl &d) {}
+
+        virtual void write(const UsingShadowDecl &d) {}
+
+        virtual void write(const UsingDirectiveDecl &d) {}
 
         virtual void write(const ObjCInterfaceDecl &d) {}
 
