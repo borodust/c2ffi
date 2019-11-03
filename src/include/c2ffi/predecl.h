@@ -24,30 +24,53 @@
 
 namespace c2ffi {
     class Type;
+
     class SimpleType;
+
     class BasicType;
+
     class BitfieldType;
+
     class PointerType;
+
     class ArrayType;
+
     class RecordType;
+
     class EnumType;
+
     class DeclType;
+
     class ReferenceType;
+
     class TemplateType;
 
     class Decl;
+
     class UnhandledDecl;
+
     class TypeDecl;
+
     class VarDecl;
+
     class FunctionDecl;
+
     class TypedefDecl;
+
     class RecordDecl;
+
     class EnumDecl;
+
     class CXXRecordDecl;
+
     class CXXFunctionDecl;
+
     class CXXNamespaceDecl;
+
     class ObjCInterfaceDecl;
+
     class ObjCCategoryDecl;
+
     class ObjCProtocolDecl;
 }
 #endif /* C2FFI_PREDECL_H */

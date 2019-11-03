@@ -19,7 +19,7 @@
     along with c2ffi.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <limits.h>
+#include <climits>
 
 #include <getopt.h>
 #include <sys/stat.h>
@@ -32,63 +32,72 @@
 static char short_opt[] = "I:i:F:D:M:o:hN:x:A:T:E";
 
 enum {
-    WITH_MACRO_DEFS = CHAR_MAX+1,
+    WITH_MACRO_DEFS = CHAR_MAX + 1,
 };
 
 static struct option options[] = {
-    { "include",     required_argument, 0, 'I' },
-    { "sys-include", required_argument, 0, 'i' },
-    { "framework-include", required_argument, 0, 'F' },
-    { "driver",      required_argument, 0, 'D' },
-    { "help",        no_argument,       0, 'h' },
-    { "macro-file",  required_argument, 0, 'M' },
-    { "output",      required_argument, 0, 'o' },
-    { "namespace",   required_argument, 0, 'N' },
-    { "lang",        required_argument, 0, 'x' },
-    { "arch",        required_argument, 0, 'A' },
-    { "templates",   required_argument, 0, 'T' },
-    { "std",         required_argument, 0, 'S' },
-    { "with-macro-defs", no_argument,   0, WITH_MACRO_DEFS },
-    { 0, 0, 0, 0 }
+        {"include",           required_argument, nullptr, 'I'},
+        {"sys-include",       required_argument, nullptr, 'i'},
+        {"framework-include", required_argument, nullptr, 'F'},
+        {"driver",            required_argument, nullptr, 'D'},
+        {"help",              no_argument,       nullptr, 'h'},
+        {"macro-file",        required_argument, nullptr, 'M'},
+        {"output",            required_argument, nullptr, 'o'},
+        {"namespace",         required_argument, nullptr, 'N'},
+        {"lang",              required_argument, nullptr, 'x'},
+        {"arch",              required_argument, nullptr, 'A'},
+        {"templates",         required_argument, nullptr, 'T'},
+        {"std",               required_argument, nullptr, 'S'},
+        {"with-macro-defs",   no_argument,       nullptr, WITH_MACRO_DEFS},
+        {nullptr, 0,                             nullptr, 0}
 };
 
-static void usage(void);
-static c2ffi::OutputDriver* select_driver(std::string name, std::ostream *os);
+static void usage();
 
-clang::InputKind parseLang(std::string str) {
+static c2ffi::OutputDriver *select_driver(const std::string& name, std::ostream *os);
+
+clang::InputKind parseLang(const std::string &str) {
     using namespace clang;
     using Language = InputKind::Language;
 
-    if(str == "c")      return InputKind(Language::C);
-    if(str == "c++")    return InputKind(Language::CXX);
-    if(str == "objc")   return InputKind(Language::ObjC);
-    if(str == "objc++") return InputKind(Language::ObjCXX);
+    if (str == "c") return {Language::C};
+    if (str == "c++") return {Language::CXX};
+    if (str == "objc") return {Language::ObjC};
+    if (str == "objc++") return {Language::ObjCXX};
 
     exit(1);
 }
 
-clang::LangStandard::Kind parseStd(std::string std) {
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedMacroInspection"
+
+clang::LangStandard::Kind parseStd(const std::string &std) {
 #define LANGSTANDARD(ident, name, lang, desc, features) if(std == name) return clang::LangStandard::lang_##ident;
+
 #include "clang/Frontend/LangStandards.def"
+
     return clang::LangStandard::lang_unspecified;
 }
 
-clang::InputKind parseExtension(std::string file) {
+#pragma clang diagnostic pop
+
+clang::InputKind parseExtension(const std::string& file) {
     using namespace clang;
     using Language = InputKind::Language;
 
-    std::string ext = file.substr(file.find_last_of('.')+1, std::string::npos);
+    std::string ext = file.substr(file.find_last_of('.') + 1, std::string::npos);
 
-    if(ext == "c")      return InputKind(Language::C);
-    if(ext == "cpp" ||
-       ext == "cxx" ||
-       ext == "c++" ||
-       ext == "hpp" ||
-       ext == "hxx")    return InputKind(Language::CXX);
-    if(ext == "m")      return InputKind(Language::ObjC);
-    if(ext == "mm")     return InputKind(Language::ObjCXX);
+    if (ext == "c") return {Language::C};
+    if (ext == "cpp" ||
+        ext == "cxx" ||
+        ext == "c++" ||
+        ext == "hpp" ||
+        ext == "hxx")
+        return InputKind(Language::CXX);
+    if (ext == "m") return InputKind(Language::ObjC);
+    if (ext == "mm") return InputKind(Language::ObjCXX);
 
-    return InputKind(Language::C);
+    return {Language::C};
 }
 
 void c2ffi::process_args(config &config, int argc, char *argv[]) {
@@ -96,34 +105,34 @@ void c2ffi::process_args(config &config, int argc, char *argv[]) {
     bool output_specified = false;
     std::ostream *os = &std::cout;
 
-    for(;;) {
+    for (;;) {
         o = getopt_long(argc, argv, short_opt, options, &index);
 
-        if(o == -1)
+        if (o == -1)
             break;
 
-        switch(o) {
+        switch (o) {
             case 'M': {
-                if(config.macro_output) {
+                if (config.macro_output) {
                     std::cerr << "Error: You may only specify one macro file"
                               << std::endl;
                     exit(1);
                 }
 
-                std::ofstream *of = new std::ofstream;
+                auto *of = new std::ofstream;
                 of->open(optarg);
                 config.macro_output = of;
                 break;
             }
 
             case 'o': {
-                if(output_specified) {
+                if (output_specified) {
                     std::cerr << "Error: You may only specify one output file"
                               << std::endl;
                     exit(1);
                 }
 
-                std::ofstream *of = new std::ofstream;
+                auto *of = new std::ofstream;
                 of->open(optarg);
                 os = of;
                 output_specified = true;
@@ -143,7 +152,7 @@ void c2ffi::process_args(config &config, int argc, char *argv[]) {
                 break;
 
             case 'D':
-                if(config.od) {
+                if (config.od) {
                     std::cerr << "Error: you may only specify one output driver"
                               << std::endl;
                     exit(1);
@@ -164,7 +173,7 @@ void c2ffi::process_args(config &config, int argc, char *argv[]) {
                 break;
 
             case 'T':
-                if(config.template_output) {
+                if (config.template_output) {
                     std::cerr << "Error: you may only specify one template output file"
                               << std::endl;
                     exit(1);
@@ -180,7 +189,7 @@ void c2ffi::process_args(config &config, int argc, char *argv[]) {
 
             case 'S':
                 config.std = parseStd(optarg);
-                if(config.std == clang::LangStandard::lang_unspecified) {
+                if (config.std == clang::LangStandard::lang_unspecified) {
                     std::cerr << "Error: unknown standard specified, --std="
                               << optarg << std::endl;
                     exit(1);
@@ -202,22 +211,22 @@ void c2ffi::process_args(config &config, int argc, char *argv[]) {
         }
     }
 
-    if(optind >= argc) {
+    if (optind >= argc) {
         std::cerr << "Error: No file specified." << std::endl;
         usage();
         exit(1);
     } else {
         config.filename = std::string(argv[optind++]);
-        if(config.kind.getLanguage() == clang::InputKind::Language::Unknown)
+        if (config.kind.getLanguage() == clang::InputKind::Language::Unknown)
             config.kind = parseExtension(config.filename);
     }
 
-    struct stat buf;
-    if(stat(config.filename.c_str(), &buf) < 0) {
+    struct stat buf{};
+    if (stat(config.filename.c_str(), &buf) < 0) {
         std::cerr << "Error: No such file: " << config.filename
                   << std::endl;
         exit(1);
-    } else if(!S_ISREG(buf.st_mode)) {
+    } else if (!S_ISREG(buf.st_mode)) {
         std::cerr << "Error: Not a regular file: " << config.filename
                   << std::endl;
         exit(1);
@@ -225,60 +234,60 @@ void c2ffi::process_args(config &config, int argc, char *argv[]) {
 
     config.output = os;
 
-    if(!config.od)
+    if (!config.od)
         config.od = OutputDrivers[0].fn(os);
     else
         config.od->set_os(os);
 }
 
-void usage(void) {
+void usage() {
     using namespace c2ffi;
     using namespace std;
 
     cout <<
-        "Usage: c2ffi [options ...] FILE\n"
-        "\n"
-        "Options:\n"
-        "      -I, --include	        Add a \"LOCAL\" include path\n"
-        "      -i, --sys-include        Add a <system> include path\n"
-        "      -F, --framework-include  Add MacOS framework include path\n"
-        "      -D, --driver	        Specify an output driver (default: "
+         "Usage: c2ffi [options ...] FILE\n"
+         "\n"
+         "Options:\n"
+         "      -I, --include	        Add a \"LOCAL\" include path\n"
+         "      -i, --sys-include        Add a <system> include path\n"
+         "      -F, --framework-include  Add MacOS framework include path\n"
+         "      -D, --driver	        Specify an output driver (default: "
          << OutputDrivers[0].name << ")\n"
-        "\n"
-        "      -o, --output	        Specify an output file (default: stdout)\n"
-        "      -M, --macro-file	        Specify a file for macro definition output\n"
-        "      --with-macro-defs        Also include #defines for macro definitions\n"
-        "\n"
-        "      -N, --namespace		Specify target namespace/package/etc\n"
-        "\n"
-        "      -A, --arch		Specify the target triple for LLVM\n"
-        "                                    (default: "
+                                     "\n"
+                                     "      -o, --output	        Specify an output file (default: stdout)\n"
+                                     "      -M, --macro-file	        Specify a file for macro definition output\n"
+                                     "      --with-macro-defs        Also include #defines for macro definitions\n"
+                                     "\n"
+                                     "      -N, --namespace		Specify target namespace/package/etc\n"
+                                     "\n"
+                                     "      -A, --arch		Specify the target triple for LLVM\n"
+                                     "                                    (default: "
          << llvm::sys::getDefaultTargetTriple() << ")\n"
-        "      -x, --lang               Specify language (c, c++, objc, objc++)\n"
-        "      --std			Specify the standard (c99, c++0x, c++11, ...)\n"
-        "\n"
-        "      -E			Preprocessed output only, a la clang -E\n"
-        "\n"
-        "Drivers: ";
+                                                   "      -x, --lang               Specify language (c, c++, objc, objc++)\n"
+                                                   "      --std			Specify the standard (c99, c++0x, c++11, ...)\n"
+                                                   "\n"
+                                                   "      -E			Preprocessed output only, a la clang -E\n"
+                                                   "\n"
+                                                   "Drivers: ";
 
-    for(int i = 0;; i++) {
-        if(!OutputDrivers[i].name) break;
+    for (int i = 0;; i++) {
+        if (!OutputDrivers[i].name) break;
         cout << OutputDrivers[i].name;
-        if(OutputDrivers[i+1].name)
+        if (OutputDrivers[i + 1].name)
             cout << ", ";
     }
 
     cout << endl;
 }
 
-c2ffi::OutputDriver* select_driver(std::string name, std::ostream *os) {
+c2ffi::OutputDriver *select_driver(const std::string& name, std::ostream *os) {
     using namespace c2ffi;
     using namespace std;
 
-    for(int i = 0;; i++) {
-        if(!OutputDrivers[i].name) break;
+    for (int i = 0;; i++) {
+        if (!OutputDrivers[i].name) break;
 
-        if(name == OutputDrivers[i].name)
+        if (name == OutputDrivers[i].name)
             return OutputDrivers[i].fn(os);
     }
 

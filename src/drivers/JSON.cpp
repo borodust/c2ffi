@@ -37,16 +37,16 @@ namespace c2ffi {
 
             va_start(ap, close);
 
-            if(open) os() << "{ \"tag\": \"" << type << "\"";
-            while((ptr = va_arg(ap, char*))) {
+            if (open) os() << "{ \"tag\": \"" << type << "\"";
+            while ((ptr = va_arg(ap, char*))) {
                 os() << ", \"" << ptr << "\": ";
 
-                if((ptr = va_arg(ap, char*)))
+                if ((ptr = va_arg(ap, char*)))
                     os() << ptr;
                 else
                     break;
             }
-            if(close) os() << " }";
+            if (close) os() << " }";
 
             va_end(ap);
         }
@@ -54,23 +54,23 @@ namespace c2ffi {
         std::string hex_str(unsigned char c) {
             std::ostringstream ss;
             ss.setf(std::ios::hex, std::ios::basefield);
-            ss << "\\u00" << std::setw(2) << std::setfill('0') << (int)c;
+            ss << "\\u00" << std::setw(2) << std::setfill('0') << (int) c;
 
             return ss.str();
         }
 
         std::string escape_string(std::string s) {
-            for(int i = s.find("\\"); i != std::string::npos;
-                i = s.find("\\", i+2))
+            for (int i = s.find("\\"); i != std::string::npos;
+                 i = s.find("\\", i + 2))
                 s.replace(i, 1, "\\\\");
 
-            for(int i = s.find("\""); i != std::string::npos;
-                i = s.find("\"", i+2))
+            for (int i = s.find("\""); i != std::string::npos;
+                 i = s.find("\"", i + 2))
                 s.replace(i, 1, "\\\"");
 
-            for(int i = 0; i < s.size(); i++)
-                if((unsigned char)(s[i]) > 127 ||
-                   (unsigned char)(s[i]) < 32) {
+            for (int i = 0; i < s.size(); i++)
+                if ((unsigned char) (s[i]) > 127 ||
+                    (unsigned char) (s[i]) < 32) {
                     s.replace(i, 1, hex_str(s[i]));
                     i += 5;
                 }
@@ -78,13 +78,15 @@ namespace c2ffi {
             return s;
         }
 
-        template<typename T> std::string str(T v) {
+        template<typename T>
+        std::string str(T v) {
             std::stringstream ss;
             ss << v;
             return ss.str();
         }
 
-        template<typename T> std::string qstr(T v) {
+        template<typename T>
+        std::string qstr(T v) {
             std::stringstream ss;
             ss << '"' << escape_string(v) << '"';
             return ss.str();
@@ -92,9 +94,9 @@ namespace c2ffi {
 
         void write_fields(const NameTypeVector &fields) {
             os() << '[';
-            for(NameTypeVector::const_iterator i = fields.begin();
-                i != fields.end(); i++) {
-                if(i != fields.begin())
+            for (NameTypeVector::const_iterator i = fields.begin();
+                 i != fields.end(); i++) {
+                if (i != fields.begin())
                     os() << ", ";
 
                 write_object("field", 1, 0,
@@ -111,21 +113,21 @@ namespace c2ffi {
         }
 
         void write_template(const TemplateMixin &d) {
-            if(d.is_template()) {
+            if (d.is_template()) {
                 write_object("", 0, 0,
                              "template", NULL);
                 os() << "[";
-                for(TemplateArgVector::const_iterator i =
+                for (TemplateArgVector::const_iterator i =
                         d.args().begin();
-                    i != d.args().end(); ++i) {
-                    if(i != d.args().begin())
+                     i != d.args().end(); ++i) {
+                    if (i != d.args().begin())
                         os() << ", ";
 
                     write_object("parameter", 1, 0,
                                  "type", NULL);
                     write(*((*i)->type()));
 
-                    if((*i)->has_val())
+                    if ((*i)->has_val())
                         write_object("", 0, 0,
                                      "value", qstr((*i)->val()).c_str(),
                                      NULL);
@@ -138,11 +140,11 @@ namespace c2ffi {
 
         void write_functions(const FunctionVector &funcs) {
             os() << '[';
-            for(FunctionVector::const_iterator i = funcs.begin();
-                i != funcs.end(); i++) {
-                if(i != funcs.begin())
+            for (FunctionVector::const_iterator i = funcs.begin();
+                 i != funcs.end(); i++) {
+                if (i != funcs.begin())
                     os() << ", ";
-                write((const Writable&)*(*i));
+                write((const Writable &) *(*i));
             }
             os() << ']';
         }
@@ -166,9 +168,9 @@ namespace c2ffi {
             write_object("", 0, 0, "parameters", NULL);
             os() << "[";
             const NameTypeVector &params = d.fields();
-            for(NameTypeVector::const_iterator i = params.begin();
-                i != params.end(); i++) {
-                if(i != params.begin())
+            for (NameTypeVector::const_iterator i = params.begin();
+                 i != params.end(); i++) {
+                if (i != params.begin())
                     os() << ", ";
 
                 write_object("parameter", 1, 0,
@@ -191,7 +193,7 @@ namespace c2ffi {
 
     public:
         JSONOutputDriver(std::ostream *os)
-            : OutputDriver(os), _level(0) { }
+                : OutputDriver(os), _level(0) {}
 
         using OutputDriver::write;
 
@@ -266,9 +268,9 @@ namespace c2ffi {
         virtual void write(const RecordType &t) {
             const char *type = NULL;
 
-            if(t.is_union())
+            if (t.is_union())
                 type = ":union";
-            else if(t.is_class())
+            else if (t.is_class())
                 type = ":class";
             else
                 type = ":struct";
@@ -306,13 +308,13 @@ namespace c2ffi {
 
             write(d.type());
 
-            if(d.value() != "") {
-                if(d.is_string()
-                   || d.value() == "inf"
-                   || d.value() == "INF"
-                   || d.value() == "Inf"
-                   || d.value() == "nan"
-                   || d.value() == "NaN")
+            if (d.value() != "") {
+                if (d.is_string()
+                    || d.value() == "inf"
+                    || d.value() == "INF"
+                    || d.value() == "Inf"
+                    || d.value() == "nan"
+                    || d.value() == "NaN")
                     write_object("", 0, 0,
                                  "value", qstr(d.value()).c_str(),
                                  NULL);
@@ -328,7 +330,7 @@ namespace c2ffi {
         virtual void write(const FunctionDecl &d) {
             write_function_header(d);
 
-            if(d.is_objc_method())
+            if (d.is_objc_method())
                 write_object("", 0, 0,
                              "scope", d.is_class_method() ? "\"class\"" : "\"instance\"",
                              NULL);
@@ -380,7 +382,7 @@ namespace c2ffi {
 
         virtual void write(const CXXRecordDecl &d) {
             const char *type = d.is_union() ? "union" :
-                (d.is_class() ? "class" : "struct");
+                               (d.is_class() ? "class" : "struct");
 
             write_object(type, 1, 0,
                          "ns", str(d.ns()).c_str(),
@@ -399,10 +401,10 @@ namespace c2ffi {
             os() << "[";
 
             const CXXRecordDecl::ParentRecordVector &parents = d.parents();
-            for(CXXRecordDecl::ParentRecordVector::const_iterator i
+            for (CXXRecordDecl::ParentRecordVector::const_iterator i
                     = parents.begin();
-                i != parents.end(); ++i) {
-                if(i != parents.begin())
+                 i != parents.end(); ++i) {
+                if (i != parents.begin())
                     os() << ", ";
 
                 write_object("class", 1, 0,
@@ -411,13 +413,16 @@ namespace c2ffi {
                              "is_virtual", ((*i).is_virtual ? "true" : "false"),
                              "access", NULL);
 
-                switch((*i).access) {
+                switch ((*i).access) {
                     case CXXRecordDecl::access_private:
-                        os() << "\"private\""; break;
+                        os() << "\"private\"";
+                        break;
                     case CXXRecordDecl::access_protected:
-                        os() << "\"protected\""; break;
+                        os() << "\"protected\"";
+                        break;
                     case CXXRecordDecl::access_public:
-                        os() << "\"public\""; break;
+                        os() << "\"public\"";
+                        break;
                     default:
                         os() << "\"unknown\"";
                 }
@@ -455,9 +460,9 @@ namespace c2ffi {
 
             os() << "[";
             const NameNumVector &fields = d.fields();
-            for(NameNumVector::const_iterator i = fields.begin();
-                i != fields.end(); ++i) {
-                if(i != fields.begin())
+            for (NameNumVector::const_iterator i = fields.begin();
+                 i != fields.end(); ++i) {
+                if (i != fields.begin())
                     os() << ", ";
 
                 write_object("field", 1, 1,
@@ -479,9 +484,9 @@ namespace c2ffi {
 
             os() << "[";
             const NameVector &protos = d.protocols();
-            for(NameVector::const_iterator i = protos.begin();
-                i != protos.end(); i++) {
-                if(i != protos.begin())
+            for (NameVector::const_iterator i = protos.begin();
+                 i != protos.end(); i++) {
+                if (i != protos.begin())
                     os() << ", ";
                 os() << qstr(*i).c_str();
             }
@@ -518,7 +523,7 @@ namespace c2ffi {
         }
     };
 
-    OutputDriver* MakeJSONOutputDriver(std::ostream *os) {
+    OutputDriver *MakeJSONOutputDriver(std::ostream *os) {
         return new JSONOutputDriver(os);
     }
 }

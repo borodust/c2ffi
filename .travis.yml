@@ -21,30 +21,30 @@ env:
 
 matrix:
   include:
-  - os: linux
-    env:
-      - ARCH=i686
-      - PLATFORM=linux
-      - CFLAGS=-m32 -static
-  - os: linux
-    env:
-      - ARCH=x86-64
-      - PLATFORM=linux
-      - CFLAGS=-m64 -static
-  - os: osx
-    env:
-      - ARCH=i686
-      - PLATFORM=darwin
-      - CFLAGS=-m32 -static
-  - os: osx
-    env:
-      - ARCH=x86-64
-      - PLATFORM=darwin
-      - CFLAGS=-m64 -static
+    - os: linux
+      env:
+        - ARCH=i686
+        - PLATFORM=linux
+        - CFLAGS=-m32 -static
+    - os: linux
+      env:
+        - ARCH=x86-64
+        - PLATFORM=linux
+        - CFLAGS=-m64 -static
+    - os: osx
+      env:
+        - ARCH=i686
+        - PLATFORM=darwin
+        - CFLAGS=-m32 -static
+    - os: osx
+      env:
+        - ARCH=x86-64
+        - PLATFORM=darwin
+        - CFLAGS=-m64 -static
 
 branches:
   only:
-  - "/^v\\d+(\\.\\d+)+$/"
+    - "/^v\\d+(\\.\\d+)+$/"
 
 before_install:
   - |

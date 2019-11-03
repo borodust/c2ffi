@@ -23,16 +23,15 @@
 #define C2FFI_TYPE_H
 
 #include <string>
+#include <utility>
 #include <vector>
 #include <ostream>
 
-#include <stdint.h>
+#include <cstdint>
 
 #include <clang/AST/Type.h>
 #include <clang/AST/Decl.h>
 #include <clang/Frontend/CompilerInstance.h>
-
-#include "c2ffi.h"
 
 namespace c2ffi {
     class C2FFIASTConsumer;
@@ -48,31 +47,35 @@ namespace c2ffi {
         unsigned _bit_alignment;
 
         friend class PointerType;
+
     public:
         Type(const clang::CompilerInstance &ci, const clang::Type *t);
-        virtual ~Type() { }
 
-        static Type* make_type(C2FFIASTConsumer*, const clang::Type*);
+        ~Type() override = default;
+
+        static Type *make_type(C2FFIASTConsumer *, const clang::Type *);
 
         unsigned int id() const { return _id; }
+
         void set_id(unsigned int id) { _id = id; }
 
         uint64_t bit_offset() const { return _bit_offset; }
+
         void set_bit_offset(uint64_t offset) { _bit_offset = offset; }
 
         uint64_t bit_size() const { return _bit_size; }
+
         void set_bit_size(uint64_t size) { _bit_size = size; }
 
         uint64_t bit_alignment() const { return _bit_alignment; }
-        void set_bit_alignment(uint64_t alignment) { _bit_alignment = alignment; }
 
-        std::string metatype() const;
+        void set_bit_alignment(uint64_t alignment) { _bit_alignment = alignment; }
     };
 
     typedef std::string Name;
     typedef std::vector<Name> NameVector;
 
-    typedef std::pair<Name, Type*> NameTypePair;
+    typedef std::pair<Name, Type *> NameTypePair;
     typedef std::vector<NameTypePair> NameTypeVector;
 
     typedef std::pair<Name, uint64_t> NameNumPair;
@@ -85,7 +88,7 @@ namespace c2ffi {
         SimpleType(const clang::CompilerInstance &ci, const clang::Type *t,
                    std::string name);
 
-        const std::string& name() const { return _name; }
+        const std::string &name() const { return _name; }
 
         DEFWRITER(SimpleType);
     };
@@ -105,11 +108,12 @@ namespace c2ffi {
     public:
         BitfieldType(const clang::CompilerInstance &ci, const clang::Type *t,
                      unsigned int width, Type *base)
-            : Type(ci, t), _width(width), _base(base) { }
+                : Type(ci, t), _width(width), _base(base) {}
 
-        virtual ~BitfieldType() { delete _base; }
+        ~BitfieldType() override { delete _base; }
 
-        const Type* base() const { return _base; }
+        const Type *base() const { return _base; }
+
         unsigned int width() const { return _width; }
 
         DEFWRITER(BitfieldType);
@@ -122,11 +126,11 @@ namespace c2ffi {
     public:
         PointerType(const clang::CompilerInstance &ci, const clang::Type *t,
                     Type *pointee)
-            : Type(ci, t), _pointee(pointee) { }
-        virtual ~PointerType() { delete _pointee; }
+                : Type(ci, t), _pointee(pointee) {}
 
-        const Type& pointee() const { return *_pointee; }
-        bool is_string() const;
+        ~PointerType() override { delete _pointee; }
+
+        const Type &pointee() const { return *_pointee; }
 
         DEFWRITER(PointerType);
     };
@@ -134,8 +138,9 @@ namespace c2ffi {
     class ReferenceType : public PointerType {
     public:
         ReferenceType(const clang::CompilerInstance &ci, const clang::Type *t,
-                    Type *pointee)
-            : PointerType(ci, t, pointee) { }
+                      Type *pointee)
+                : PointerType(ci, t, pointee) {}
+
         DEFWRITER(ReferenceType);
     };
 
@@ -144,9 +149,10 @@ namespace c2ffi {
     public:
         ArrayType(const clang::CompilerInstance &ci, const clang::Type *t,
                   Type *pointee, uint64_t size)
-            : PointerType(ci, t, pointee), _size(size) { }
+                : PointerType(ci, t, pointee), _size(size) {}
 
         uint64_t size() const { return _size; }
+
         DEFWRITER(ArrayType);
     };
 
@@ -158,10 +164,12 @@ namespace c2ffi {
                    const clang::Type *t,
                    std::string name, bool is_union = false,
                    bool is_class = false,
-                   const clang::TemplateArgumentList *arglist = NULL);
+                   const clang::TemplateArgumentList *arglist = nullptr);
 
         bool is_union() const { return _is_union; }
+
         bool is_class() const { return _is_class; }
+
         DEFWRITER(RecordType);
     };
 
@@ -169,7 +177,8 @@ namespace c2ffi {
     public:
         EnumType(const clang::CompilerInstance &ci, const clang::Type *t,
                  std::string name)
-            : SimpleType(ci, t, name) { }
+                : SimpleType(ci, t, std::move(name)) {}
+
         DEFWRITER(EnumType);
     };
 
@@ -182,7 +191,7 @@ namespace c2ffi {
                  Decl *d, const clang::Decl *cd);
 
         // Note, this cheats:
-        virtual void write(OutputDriver &od) const;
+        void write(OutputDriver &od) const override;
     };
 }
 

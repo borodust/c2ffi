@@ -28,12 +28,12 @@
 #include "c2ffi.h"
 #include "c2ffi/opt.h"
 
-#define if_cast(v,T,e) if(T *v = llvm::dyn_cast<T>((e)))
-#define if_const_cast(v,T,e) if(const T *v = llvm::dyn_cast<T>((e)))
+#define if_cast(v, T, e) if(auto *v = llvm::dyn_cast<T>((e)))
+#define if_const_cast(v, T, e) if(const auto *v = llvm::dyn_cast<T>((e)))
 
 namespace c2ffi {
-    typedef std::set<const clang::Decl*> ClangDeclSet;
-    typedef std::map<const clang::Decl*, int> ClangDeclIDMap;
+    typedef std::set<const clang::Decl *> ClangDeclSet;
+    typedef std::map<const clang::Decl *, int> ClangDeclIDMap;
 
     class C2FFIASTConsumer : public clang::ASTConsumer {
         config &_config;
@@ -52,37 +52,43 @@ namespace c2ffi {
 
     public:
         C2FFIASTConsumer(clang::CompilerInstance &ci, config &config)
-            : _ci(ci), _od(config.od), _mid(false), _decl_id(0), _ns(NULL),
-              _config(config) { }
+                : _ci(ci), _od(config.od), _mid(false), _decl_id(0), _ns(nullptr),
+                  _config(config) {}
 
-        clang::CompilerInstance& ci() { return _ci; }
-        c2ffi::OutputDriver& od() { return *_od; }
+        clang::CompilerInstance &ci() { return _ci; }
 
-        virtual bool HandleTopLevelDecl(clang::DeclGroupRef d);
-        virtual void HandleTopLevelDeclInObjCContainer(clang::DeclGroupRef d);
+        c2ffi::OutputDriver &od() { return *_od; }
 
-        void HandleDecl(clang::Decl *d, const clang::NamedDecl *ns = NULL);
+        bool HandleTopLevelDecl(clang::DeclGroupRef d) override;
+
+        void HandleDecl(clang::Decl *d, const clang::NamedDecl *ns = nullptr);
+
         void HandleDeclContext(const clang::DeclContext *dc,
                                const clang::NamedDecl *ns);
+
         void HandleNS(const clang::NamespaceDecl *ns);
+
         void PostProcess();
 
-        Decl* proc(const clang::Decl*, Decl*);
+        Decl *proc(const clang::Decl *, Decl *);
 
         bool is_cur_decl(const clang::Decl *d) const;
+
         unsigned int decl_id(const clang::Decl *d) const;
+
         unsigned int add_decl(const clang::Decl *d) {
-            if(!d) {
+            if (!d) {
                 return 0;
-            } else if(!_decl_map.count(d)) {
+            } else if (!_decl_map.count(d)) {
                 _decl_map[d] = ++_decl_id;
                 return _decl_id;
             } else {
                 return _decl_map[d];
             }
         }
+
         unsigned int add_cxx_decl(const clang::Decl *d) {
-            if(d) {
+            if (d) {
                 _cxx_decls.insert(d);
                 return add_decl(d);
             }
@@ -90,20 +96,31 @@ namespace c2ffi {
             return 0;
         }
 
-        const clang::NamedDecl* ns() const { return _ns; }
+        const clang::NamedDecl *ns() const { return _ns; }
 
-        Decl* make_decl(const clang::Decl *d, bool is_toplevel = true);
-        Decl* make_decl(const clang::NamedDecl *d, bool is_toplevel = true);
-        Decl* make_decl(const clang::FunctionDecl *d, bool is_toplevel = true);
-        Decl* make_decl(const clang::VarDecl *d, bool is_toplevel = true);
-        Decl* make_decl(const clang::RecordDecl *d, bool is_toplevel = true);
-        Decl* make_decl(const clang::TypedefDecl *d, bool is_toplevel = true);
-        Decl* make_decl(const clang::EnumDecl *d, bool is_toplevel = true);
-        Decl* make_decl(const clang::CXXRecordDecl *d, bool is_toplevel = true);
-        Decl* make_decl(const clang::NamespaceDecl *d, bool is_toplevel = true);
-        Decl* make_decl(const clang::ObjCInterfaceDecl *d, bool is_toplevel = true);
-        Decl* make_decl(const clang::ObjCCategoryDecl *d, bool is_toplevel = true);
-        Decl* make_decl(const clang::ObjCProtocolDecl *d, bool is_toplevel = true);
+        static Decl *make_decl(const clang::Decl *d);
+
+        static Decl *make_decl(const clang::NamedDecl *d);
+
+        Decl *make_decl(const clang::FunctionDecl *d);
+
+        Decl *make_decl(const clang::VarDecl *d);
+
+        Decl *make_decl(const clang::RecordDecl *d, bool is_toplevel = true);
+
+        Decl *make_decl(const clang::TypedefDecl *d);
+
+        Decl *make_decl(const clang::EnumDecl *d);
+
+        Decl *make_decl(const clang::CXXRecordDecl *d, bool is_toplevel = true);
+
+        Decl *make_decl(const clang::NamespaceDecl *d);
+
+        Decl *make_decl(const clang::ObjCInterfaceDecl *d);
+
+        Decl *make_decl(const clang::ObjCCategoryDecl *d);
+
+        Decl *make_decl(const clang::ObjCProtocolDecl *d);
 
         void write_template(const clang::ClassTemplateSpecializationDecl *d,
                             std::ofstream &out);

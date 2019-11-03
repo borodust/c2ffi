@@ -22,12 +22,10 @@
 #include <memory>
 
 #include <llvm/Support/Host.h>
-#include <llvm/ADT/IntrusiveRefCntPtr.h>
 
 #include <clang/Basic/DiagnosticOptions.h>
 #include <clang/Frontend/TextDiagnosticPrinter.h>
 #include <clang/Frontend/CompilerInstance.h>
-#include <clang/FrontendTool/Utils.h>
 #include <clang/Basic/TargetOptions.h>
 #include <clang/Basic/TargetInfo.h>
 #include <clang/Basic/FileManager.h>
@@ -35,9 +33,6 @@
 #include <clang/Lex/HeaderSearch.h>
 #include <clang/Lex/Preprocessor.h>
 #include <clang/Lex/PreprocessorOptions.h>
-#include <clang/Basic/Diagnostic.h>
-#include <clang/AST/ASTContext.h>
-#include <clang/AST/ASTConsumer.h>
 #include <clang/Parse/Parser.h>
 #include <clang/Parse/ParseAST.h>
 
@@ -51,10 +46,10 @@ using namespace c2ffi;
 void c2ffi::add_include(clang::CompilerInstance &ci, const char *path, bool is_angled,
                         bool show_error) {
     struct stat buf{};
-    if(stat(path, &buf) < 0 || !S_ISDIR(buf.st_mode)) {
-        if(show_error) {
+    if (stat(path, &buf) < 0 || !S_ISDIR(buf.st_mode)) {
+        if (show_error) {
             std::cerr << "Error: Not a directory: ";
-            if(is_angled)
+            if (is_angled)
                 std::cerr << "-i ";
             else
                 std::cerr << "-I ";
@@ -70,14 +65,14 @@ void c2ffi::add_include(clang::CompilerInstance &ci, const char *path, bool is_a
     clang::DirectoryLookup lookup(dirent, clang::SrcMgr::C_System, false);
 
     ci.getPreprocessor().getHeaderSearchInfo()
-        .AddSearchPath(lookup, is_angled);
+            .AddSearchPath(lookup, is_angled);
 }
 
 void c2ffi::add_framework_include(clang::CompilerInstance &ci, const char *path,
                                   bool show_error) {
-    struct stat buf;
-    if(stat(path, &buf) < 0 || !S_ISDIR(buf.st_mode)) {
-        if(show_error) {
+    struct stat buf{};
+    if (stat(path, &buf) < 0 || !S_ISDIR(buf.st_mode)) {
+        if (show_error) {
             std::cerr << "Error: Not a directory: ";
             std::cerr << "-F ";
             std::cerr << path << std::endl;
@@ -88,19 +83,19 @@ void c2ffi::add_framework_include(clang::CompilerInstance &ci, const char *path,
     }
 
     ci.getHeaderSearchOpts()
-      .AddPath(llvm::StringRef(path), clang::frontend::IncludeDirGroup::Angled, true, true);
+            .AddPath(llvm::StringRef(path), clang::frontend::IncludeDirGroup::Angled, true, true);
 }
 
 void c2ffi::add_framework_includes(clang::CompilerInstance &ci,
                                    c2ffi::IncludeVector &includes, bool show_error) {
-  for(auto &&include : includes)
-    add_framework_include(ci, include.c_str(), show_error);
+    for (auto &&include : includes)
+        add_framework_include(ci, include.c_str(), show_error);
 }
 
 void c2ffi::add_includes(clang::CompilerInstance &ci,
                          c2ffi::IncludeVector &includeVector, bool is_angled,
                          bool show_error) {
-    for(auto &&include : includeVector)
+    for (auto &&include : includeVector)
         add_include(ci, include.c_str(), is_angled, show_error);
 }
 
@@ -110,13 +105,13 @@ void c2ffi::init_ci(config &c, clang::CompilerInstance &ci) {
     using clang::TargetOptions;
     using clang::TargetInfo;
 
-    DiagnosticOptions *dopt = new DiagnosticOptions;
-    TextDiagnosticPrinter *tpd =
-        new TextDiagnosticPrinter(llvm::errs(), dopt, false);
+    auto *dopt = new DiagnosticOptions;
+    auto *tpd =
+            new TextDiagnosticPrinter(llvm::errs(), dopt, false);
     ci.createDiagnostics(tpd);
 
     auto pto = std::make_shared<TargetOptions>();
-    if(c.arch.empty())
+    if (c.arch.empty())
         pto->Triple = llvm::sys::getDefaultTargetTriple();
     else
         pto->Triple = c.arch;
@@ -124,7 +119,7 @@ void c2ffi::init_ci(config &c, clang::CompilerInstance &ci) {
     TargetInfo *pti = TargetInfo::CreateTargetInfo(ci.getDiagnostics(), pto);
 
     clang::LangOptions &lo = ci.getLangOpts();
-    switch(pti->getTriple().getEnvironment()) {
+    switch (pti->getTriple().getEnvironment()) {
         case llvm::Triple::EnvironmentType::GNU:
             lo.GNUMode = 1;
             break;

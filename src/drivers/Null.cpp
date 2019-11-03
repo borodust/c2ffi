@@ -27,36 +27,50 @@ namespace c2ffi {
     class NullOutputDriver : public OutputDriver {
     public:
         NullOutputDriver(std::ostream *os)
-            : OutputDriver(os) { }
+                : OutputDriver(os) {}
 
-        virtual void write_namespace(const std::string &ns) { }
+        virtual void write_namespace(const std::string &ns) {}
 
-        virtual void write_comment(const char *str) { }
+        virtual void write_comment(const char *str) {}
 
         using OutputDriver::write;
 
         // Types -----------------------------------------------------------
-        virtual void write(const SimpleType &t) { }
-        virtual void write(const BasicType &t) { }
-        virtual void write(const BitfieldType &t) { }
-        virtual void write(const PointerType& t) { }
-        virtual void write(const ArrayType &t) { }
-        virtual void write(const RecordType &t) { }
-        virtual void write(const EnumType &t) { }
+        virtual void write(const SimpleType &t) {}
+
+        virtual void write(const BasicType &t) {}
+
+        virtual void write(const BitfieldType &t) {}
+
+        virtual void write(const PointerType &t) {}
+
+        virtual void write(const ArrayType &t) {}
+
+        virtual void write(const RecordType &t) {}
+
+        virtual void write(const EnumType &t) {}
 
         // Decls -----------------------------------------------------------
-        virtual void write(const UnhandledDecl &d) { }
-        virtual void write(const VarDecl &d) { }
-        virtual void write(const FunctionDecl &d) { }
-        virtual void write(const TypedefDecl &d) { }
-        virtual void write(const RecordDecl &d) { }
-        virtual void write(const EnumDecl &d) { }
-        virtual void write(const ObjCInterfaceDecl &d) { }
-        virtual void write(const ObjCCategoryDecl &d) { }
-        virtual void write(const ObjCProtocolDecl &d) { }
+        virtual void write(const UnhandledDecl &d) {}
+
+        virtual void write(const VarDecl &d) {}
+
+        virtual void write(const FunctionDecl &d) {}
+
+        virtual void write(const TypedefDecl &d) {}
+
+        virtual void write(const RecordDecl &d) {}
+
+        virtual void write(const EnumDecl &d) {}
+
+        virtual void write(const ObjCInterfaceDecl &d) {}
+
+        virtual void write(const ObjCCategoryDecl &d) {}
+
+        virtual void write(const ObjCProtocolDecl &d) {}
     };
 
-    OutputDriver* MakeNullOutputDriver(std::ostream *os) {
+    OutputDriver *MakeNullOutputDriver(std::ostream *os) {
         return new NullOutputDriver(os);
     }
 }

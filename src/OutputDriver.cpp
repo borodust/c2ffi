@@ -18,36 +18,28 @@
     along with c2ffi.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdarg.h>
-#include <stdio.h>
+#include <cstdarg>
+#include <cstdio>
 #include "c2ffi.h"
 
 /*** Add new OutputDrivers here: ***************************************/
 
 namespace c2ffi {
-    OutputDriver* MakeNullOutputDriver(std::ostream *os);
-    OutputDriver* MakeJSONOutputDriver(std::ostream *os);
-    OutputDriver* MakeSexpOutputDriver(std::ostream *os);
+    OutputDriver *MakeNullOutputDriver(std::ostream *os);
+
+    OutputDriver *MakeJSONOutputDriver(std::ostream *os);
+
+    OutputDriver *MakeSexpOutputDriver(std::ostream *os);
 
     OutputDriverField OutputDrivers[] = {
-        { "json", &MakeJSONOutputDriver },
-        { "sexp", &MakeSexpOutputDriver },
-        { "null", &MakeNullOutputDriver },
-        { 0, 0 }
+            {"json", &MakeJSONOutputDriver},
+            {"sexp", &MakeSexpOutputDriver},
+            {"null", &MakeNullOutputDriver},
+            {nullptr,      0}
     };
 }
 
 /***********************************************************************/
 
 namespace c2ffi {
-    void OutputDriver::comment(char *fmt, ...) {
-        va_list ap;
-        char buf[1024];
-        va_start(ap, fmt);
-
-        vsnprintf(buf, sizeof(buf), fmt, ap);
-        write_comment(buf);
-
-        va_end(ap);
-    }
 }

@@ -5,3 +5,5 @@ build.*/
 compile_commands.json
 CMakeLists.txt.user
 *~
+.idea/
+cmake-build-debug/

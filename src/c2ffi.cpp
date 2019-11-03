@@ -21,27 +21,20 @@
 #include <iostream>
 
 #include <llvm/Support/raw_os_ostream.h>
-#include <llvm/Support/Host.h>
-#include <llvm/ADT/IntrusiveRefCntPtr.h>
 
 #include <clang/Basic/Version.h>
 #include <clang/Basic/DiagnosticOptions.h>
-#include <clang/Frontend/TextDiagnosticPrinter.h>
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/Frontend/Utils.h>
-#include <clang/Basic/TargetOptions.h>
-#include <clang/Basic/TargetInfo.h>
 #include <clang/Basic/FileManager.h>
 #include <clang/Basic/SourceManager.h>
 #include <clang/Lex/HeaderSearch.h>
 #include <clang/Lex/Preprocessor.h>
 #include <clang/Basic/Diagnostic.h>
-#include <clang/AST/ASTContext.h>
 #include <clang/AST/ASTConsumer.h>
 #include <clang/Parse/Parser.h>
 #include <clang/Parse/ParseAST.h>
 
-#include "c2ffi.h"
 #include "c2ffi/init.h"
 #include "c2ffi/opt.h"
 #include "c2ffi/ast.h"
@@ -63,7 +56,7 @@ int main(int argc, char *argv[]) {
     add_include(ci, "/opt/llvm/lib/clang/" CLANG_VERSION_STRING "/include", true);
     add_include(ci, "/usr/include", true);
 
-    C2FFIASTConsumer *astc = NULL;
+    C2FFIASTConsumer *astc = nullptr;
 
     const clang::FileEntry *file = ci.getFileManager().getFile(sys.filename);
     clang::FileID fid = ci.getSourceManager().createFileID(file,
@@ -73,7 +66,7 @@ int main(int argc, char *argv[]) {
     ci.getDiagnosticClient().BeginSourceFile(ci.getLangOpts(),
                                              &ci.getPreprocessor());
 
-    if(sys.preprocess_only) {
+    if (sys.preprocess_only) {
         llvm::raw_ostream *os = new llvm::raw_os_ostream(*sys.output);
         clang::DoPrintPreprocessedInput(ci.getPreprocessor(), os,
                                         ci.getPreprocessorOutputOpts());
@@ -85,19 +78,19 @@ int main(int argc, char *argv[]) {
 
         sys.od->write_header();
 
-        if(sys.to_namespace != "")
+        if (!sys.to_namespace.empty())
             sys.od->write_namespace(sys.to_namespace);
 
         clang::ParseAST(ci.getPreprocessor(), astc, ci.getASTContext());
         astc->PostProcess();
         sys.od->write_footer();
 
-        if(sys.macro_output) {
+        if (sys.macro_output) {
             process_macros(ci, *sys.macro_output, sys);
             sys.macro_output->close();
         }
 
-        if(sys.template_output)
+        if (sys.template_output)
             sys.template_output->close();
     }
 

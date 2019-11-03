@@ -35,19 +35,18 @@ namespace c2ffi {
     typedef std::vector<std::string> IncludeVector;
 
     struct config {
-        config() : od(NULL), macro_output(NULL),
-                   template_output(NULL),
+        config() : od(nullptr), macro_output(nullptr),
+                   template_output(nullptr),
                    std(clang::LangStandard::lang_unspecified),
                    preprocess_only(false),
-                   with_macro_defs(false)
-        { }
+                   with_macro_defs(false) {}
 
         IncludeVector includes;
         IncludeVector sys_includes;
         IncludeVector framework_includes;
         OutputDriver *od;
 
-        std::ostream  *output;
+        std::ostream *output{};
         std::ofstream *macro_output;
         std::ofstream *template_output;
 

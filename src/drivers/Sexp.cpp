@@ -27,7 +27,7 @@ namespace c2ffi {
     class SexpOutputDriver : public OutputDriver {
         int _level;
 
-        void endl() { if(_level <= 1) os() << std::endl; }
+        void endl() { if (_level <= 1) os() << std::endl; }
 
         void write_fields(const NameTypeVector &fields,
                           std::string pre = "",
@@ -37,12 +37,12 @@ namespace c2ffi {
 
             os() << std::endl << spaces << pre;
 
-            for(NameTypeVector::const_iterator i = fields.begin();
-                i != fields.end(); i++) {
-                if(i != fields.begin())
+            for (NameTypeVector::const_iterator i = fields.begin();
+                 i != fields.end(); i++) {
+                if (i != fields.begin())
                     os() << std::endl << spaces << spaces_pad;
 
-                os()  << "(" << i->first << " ";
+                os() << "(" << i->first << " ";
                 write(*(i->second));
                 os() << ")";
             }
@@ -55,14 +55,14 @@ namespace c2ffi {
 
             os() << std::endl << spaces << '(';
 
-            for(FunctionVector::const_iterator i = funcs.begin();
-                i != funcs.end(); i++) {
-                if(i != funcs.begin())
+            for (FunctionVector::const_iterator i = funcs.begin();
+                 i != funcs.end(); i++) {
+                if (i != funcs.begin())
                     os() << std::endl << spaces << " ";
 
-                if((*i)->is_objc_method()) {
+                if ((*i)->is_objc_method()) {
                     os() << "(";
-                    if((*i)->is_class_method())
+                    if ((*i)->is_class_method())
                         os() << "@+ ";
                     else
                         os() << "@- ";
@@ -70,7 +70,7 @@ namespace c2ffi {
 
                 write(*(*i));
 
-                if((*i)->is_objc_method())
+                if ((*i)->is_objc_method())
                     os() << ")";
             }
 
@@ -78,7 +78,7 @@ namespace c2ffi {
         }
 
         void maybe_write_location(const Decl &d) {
-            if(d.location() != "") {
+            if (d.location() != "") {
                 endl();
                 write_comment(d.location().c_str());
             }
@@ -86,7 +86,7 @@ namespace c2ffi {
 
     public:
         SexpOutputDriver(std::ostream *os)
-            : OutputDriver(os), _level(0) { }
+                : OutputDriver(os), _level(0) {}
 
         virtual void write_namespace(const std::string &ns) {
             os() << "(in-package :" << ns << ")" << std::endl;
@@ -113,7 +113,7 @@ namespace c2ffi {
             os() << ")";
         }
 
-        virtual void write(const PointerType& t) {
+        virtual void write(const PointerType &t) {
             _level++;
             this->os() << "(:pointer ";
             this->write(t.pointee());
@@ -131,12 +131,12 @@ namespace c2ffi {
 
         virtual void write(const RecordType &t) {
             os() << "(";
-            if(t.is_union())
+            if (t.is_union())
                 os() << ":union ";
             else
                 os() << ":struct ";
 
-            if(t.name() == "")
+            if (t.name() == "")
                 os() << ":id " << t.id();
             else
                 os() << t.name();
@@ -147,7 +147,7 @@ namespace c2ffi {
         virtual void write(const EnumType &t) {
             os() << "(:enum ";
 
-            if(t.name() == "")
+            if (t.name() == "")
                 os() << ":id " << t.id();
             else
                 os() << t.name();
@@ -167,7 +167,7 @@ namespace c2ffi {
         virtual void write(const VarDecl &d) {
             _level++;
             maybe_write_location(d);
-            if(d.is_extern())
+            if (d.is_extern())
                 os() << "(extern ";
             else
                 os() << "(const ";
@@ -175,7 +175,7 @@ namespace c2ffi {
             os() << d.name() << " ";
             write(d.type());
 
-            if(d.value() != "")
+            if (d.value() != "")
                 os() << " " << d.value();
 
             os() << ")";
@@ -189,14 +189,14 @@ namespace c2ffi {
             os() << "(function \"" << d.name() << "\" (";
 
             const NameTypeVector &params = d.fields();
-            for(NameTypeVector::const_iterator i = params.begin();
-                i != params.end(); i++) {
-                if(i != params.begin())
+            for (NameTypeVector::const_iterator i = params.begin();
+                 i != params.end(); i++) {
+                if (i != params.begin())
                     os() << " ";
 
                 os() << "(" << (*i).first;
 
-                if((*i).first != "")
+                if ((*i).first != "")
                     os() << " ";
 
                 write(*(*i).second);
@@ -205,7 +205,7 @@ namespace c2ffi {
 
             os() << ") ";
             write(d.return_type());
-            if(d.is_variadic())
+            if (d.is_variadic())
                 os() << " :variadic";
             os() << ")";
             endl();
@@ -228,18 +228,19 @@ namespace c2ffi {
             maybe_write_location(d);
             os() << "(";
 
-            if(d.is_union())
+            if (d.is_union())
                 os() << "union ";
             else
                 os() << "struct ";
 
-            if(d.name() == "")
+            if (d.name() == "")
                 os() << ":id " << d.id();
             else
                 os() << d.name();
 
             write_fields(d.fields());
-            os() << ")"; endl();
+            os() << ")";
+            endl();
             _level--;
         }
 
@@ -248,27 +249,28 @@ namespace c2ffi {
             maybe_write_location(d);
             os() << "(enum ";
 
-            if(d.name() == "")
+            if (d.name() == "")
                 os() << ":id " << d.id();
             else
                 os() << d.name();
 
             const NameNumVector &fields = d.fields();
-            for(NameNumVector::const_iterator i = fields.begin();
-                i != fields.end(); i++) {
+            for (NameNumVector::const_iterator i = fields.begin();
+                 i != fields.end(); i++) {
                 os() << std::endl
                      << "    (" << i->first << " " << i->second
                      << ")";
             }
 
-            os() << ")"; endl();
+            os() << ")";
+            endl();
             _level--;
         }
 
         virtual void write(const ObjCInterfaceDecl &d) {
             _level++;
             maybe_write_location(d);
-            if(d.is_forward())
+            if (d.is_forward())
                 os() << "(@class " << d.name();
             else
                 os() << "(@interface " << d.name();
@@ -277,9 +279,9 @@ namespace c2ffi {
 
             os() << "(";
             const NameVector &protos = d.protocols();
-            for(NameVector::const_iterator i = protos.begin();
-                i != protos.end(); i++) {
-                if(i != protos.begin())
+            for (NameVector::const_iterator i = protos.begin();
+                 i != protos.end(); i++) {
+                if (i != protos.begin())
                     os() << " ";
                 os() << *i;
             }
@@ -288,7 +290,8 @@ namespace c2ffi {
             write_fields(d.fields(), "(", ")");
             write_functions(d.functions());
 
-            os() << ")"; endl();
+            os() << ")";
+            endl();
             _level--;
         }
 
@@ -298,7 +301,8 @@ namespace c2ffi {
             os() << "(@category " << d.name()
                  << " (" << d.category() << ")";
             write_functions(d.functions());
-            os() << ")"; endl();
+            os() << ")";
+            endl();
             _level--;
         }
 
@@ -307,13 +311,14 @@ namespace c2ffi {
             maybe_write_location(d);
             os() << "(@protocol " << d.name();
             write_functions(d.functions());
-            os() << ")"; endl();
+            os() << ")";
+            endl();
             _level--;
         }
 
     };
 
-    OutputDriver* MakeSexpOutputDriver(std::ostream *os) {
+    OutputDriver *MakeSexpOutputDriver(std::ostream *os) {
         return new SexpOutputDriver(os);
     }
 }

@@ -3,11 +3,11 @@ image:
 
 environment:
   matrix:
-  - platform: x64
-    ARCH: x86-64
-    CFLAGS: -m64 -static -I/opt/llvm50/include/ -L/opt/llvm50/lib/
-    PATH: C:\msys64\mingw64\bin\;C:\msys64\usr\bin\;$(PATH)
-    PACKAGES: mingw-w64-x86_64-toolchain mingw-w64-x86_64-cmake
+    - platform: x64
+      ARCH: x86-64
+      CFLAGS: -m64 -static -I/opt/llvm50/include/ -L/opt/llvm50/lib/
+      PATH: C:\msys64\mingw64\bin\;C:\msys64\usr\bin\;$(PATH)
+      PACKAGES: mingw-w64-x86_64-toolchain mingw-w64-x86_64-cmake
 
 skip_non_tags: true
 
